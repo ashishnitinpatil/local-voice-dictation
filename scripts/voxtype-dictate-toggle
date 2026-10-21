@@ -1,0 +1,5 @@
+#!/bin/sh
+# Start/stop dictation (bound to a desktop shortcut). On stop, keep recording a moment longer so the
+# word being finished as the key is pressed isn't cut off; this also gives the key time to be released.
+[ "$(voxtype status)" = recording ] && sleep 0.6
+exec voxtype record toggle

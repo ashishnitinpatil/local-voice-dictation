@@ -106,6 +106,8 @@ Turn off Voxtype's built-in hotkey (`hotkey.enabled false`) and bind a desktop s
 2. **Add the user to the `input` group.** Voxtype's `wait_for_modifier_release` then works, and hold-to-talk becomes possible. The tradeoff: any program the user runs can then read all keyboard input. Needs sudo and a fresh login.
 3. **Stopgap:** `output.pre_type_delay_ms 600` delays typing, so modifiers are usually released first. It's not a guarantee.
 
+**People press stop while finishing their last word,** so the word gets cut off: on the test machine, "yeah" became "Huh?". Voxtype has no setting to keep recording after stop. Instead, bind the shortcut to [`scripts/voxtype-dictate-toggle`](scripts/voxtype-dictate-toggle), which waits 0.6 s before a *stop*. That catches the tail, and also gives the keys time to be released, so `pre_type_delay_ms` can stay at 0.
+
 Hold-to-talk needs either the `input` group or a desktop that supports key-release bindings (Sway, Hyprland, River). GNOME custom shortcuts only fire on press, so use toggle mode there.
 
 The on-screen overlays (`voxtype-osd*`) need layer-shell, which GNOME lacks. Set `osd.enabled false` and rely on the beeps plus GNOME's microphone indicator.
