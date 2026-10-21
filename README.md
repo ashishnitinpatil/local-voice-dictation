@@ -47,6 +47,9 @@ The default is **NVIDIA Parakeet TDT 0.6B v2, int8** (`parakeet-tdt-0.6b-v2-int8
 - **For other languages:** use `parakeet-tdt-0.6b-v3` (25 European languages) or Whisper `large-v3-turbo`.
 - **Benchmark before committing:** run `voxtype --model <m> transcribe --engine parakeet clip.wav` on a clip with known text, such as whisper.cpp's `samples/jfk.wav`. int8 and full precision gave identical text, and int8 uses less than half the RAM.
 - **Check the live leaderboard;** this field moves fast.
+- **Check the mic input level before blaming the model.** On the test machine, the mic was set to 27% and word errors were 9%. Raising the level cut them to 6.5% with no model change, and the stronger models gained much less. Measure with `pw-record` and `ffmpeg -af volumedetect`. Aim for peaks around −10 to −6 dB, with no samples at 0 dB, which means clipping. GNOME's input slider isn't linear: going from 0.27 to 0.55 (`wpctl set-volume @DEFAULT_AUDIO_SOURCE@`) added ~19 dB and clipped, and 0.40 was right.
+- **Test on the user's own voice:** have them read a ~100-word paragraph full of their real jargon and names, then compare models by word error rate. Ignore formatting-only differences such as "ten" vs "10". On real speech, Parakeet int8 matched Cohere Transcribe while being 8× faster. Whisper large-v3-turbo invented a closing "thank you".
+- **Fix recurring name errors with replacements,** e.g. `voxtype config set 'text.replacements.cloud code' 'Claude Code'`. Match on phrases, not single common words like "cloud".
 
 ## 3. Install Voxtype
 
