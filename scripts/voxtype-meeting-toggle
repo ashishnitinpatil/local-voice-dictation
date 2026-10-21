@@ -1,0 +1,9 @@
+#!/bin/sh
+# Start/stop voxtype meeting transcription; bind to a desktop shortcut.
+if voxtype meeting status | grep -q '^Meeting Status: recording'; then
+    voxtype meeting stop
+    notify-send -i media-record "Meeting transcription stopped" "Transcript saved. Ask Claude to summarize it."
+else
+    voxtype meeting start -t "Meeting $(date '+%a %d %b %H:%M')"
+    notify-send -i media-record "Meeting transcription started" "Press Ctrl+Alt+M again to stop."
+fi

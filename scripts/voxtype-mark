@@ -1,0 +1,9 @@
+#!/bin/sh
+# voxtype post-process hook: append a marker so the reader knows the text was spoken.
+# Voxtype also runs this on meeting chunks, so pass text through untouched while a meeting is recording.
+text=$(cat)
+if voxtype meeting status 2>/dev/null | grep -q '^Meeting Status: recording'; then
+    printf '%s' "$text"
+else
+    printf '%s [voice-dictated]' "$text"
+fi

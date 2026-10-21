@@ -1,0 +1,49 @@
+#!/bin/sh
+# Minimal `eitype` CLI for voxtype, built on the eitype Python wheel (PyPI ships no CLI binary).
+# Expects the wheel in a venv at ~/.local/share/eitype-shim (see SKILL.md).
+# Types via the GNOME RemoteDesktop portal (libei) - no root, no /dev/uinput.
+# LD_PRELOAD: the 0.2.2 wheel bundles a libxkbcommon missing xkb_keymap_key_get_mods_for_level.
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libxkbcommon.so.0
+exec "$HOME/.local/share/eitype-shim/bin/python" -I - "$@" <<'EOF'
+import os, sys, time
+from eitype.eitype import EiType, EiTypeConfig
+
+# Supports the subset voxtype uses: [-d MS] [-l LAYOUT] [--variant V] [-M MOD] [-k KEY] [TEXT...]
+args, opts, actions = sys.argv[1:], {}, []
+i = 0
+while i < len(args):
+    a = args[i]
+    if a in ("-d", "-l", "--variant", "-k", "-M") and i + 1 < len(args):
+        v = args[i + 1]
+        if a == "-d": opts["delay_ms"] = int(v)
+        elif a == "-l": opts["layout"] = v
+        elif a == "--variant": opts["variant"] = v
+        else: actions.append((a, v))
+        i += 2
+    else:
+        actions.append(("text", a))
+        i += 1
+
+token_path = os.path.expanduser("~/.cache/eitype/restore_token")
+try:
+    saved = open(token_path).read().strip() or None
+except OSError:
+    saved = None
+
+typer, token = EiType.py_connect_portal_with_token(saved, EiTypeConfig(**opts))
+if token and token != saved:
+    os.makedirs(os.path.dirname(token_path), exist_ok=True)
+    with open(token_path, "w") as f:
+        f.write(token)
+try:
+    for kind, v in actions:
+        if kind == "text": typer.type_text(v)
+        elif kind == "-M": typer.hold_modifier(v)
+        else:
+            typer.press_key(v)
+            typer.release_modifiers()
+finally:
+    # Closing immediately drops the tail of long text (events still in flight); let them drain.
+    time.sleep(0.25)
+    typer.close()
+EOF
