@@ -1,6 +1,6 @@
 #!/bin/sh
 # Minimal `eitype` CLI for voxtype, built on the eitype Python wheel (PyPI ships no CLI binary).
-# Expects the wheel in a venv at ~/.local/share/eitype-shim (see SKILL.md).
+# Expects the wheel in a venv at ~/.local/share/eitype-shim (see README.md).
 # Types via the GNOME RemoteDesktop portal (libei) - no root, no /dev/uinput.
 # LD_PRELOAD: the 0.2.2 wheel bundles a libxkbcommon missing xkb_keymap_key_get_mods_for_level.
 export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libxkbcommon.so.0
