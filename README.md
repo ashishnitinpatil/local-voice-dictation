@@ -102,7 +102,7 @@ Turn off Voxtype's built-in hotkey (`hotkey.enabled false`) and bind a desktop s
 
 **Serious pitfall:** typing starts ~0.3 s after the stop press. If the hotkey uses modifiers (like Ctrl+Alt+Space) and they're still held, the typed letters become shortcuts. On the test machine, where Ctrl+Alt+T opens a terminal, every "t" in a dictation opened a new terminal window. Other letters can switch workspaces, open dialogs, and so on. Fixes, best first:
 
-1. **Bind a single key with no modifiers**, such as Insert, Pause, an unused F-key, or a Copilot key. Nothing is held down, so nothing combines.
+1. **Bind a single key with no modifiers**, such as Insert, Pause, or an unused F-key. Nothing is held down, so nothing combines. A **Copilot key** works well too, with one catch: it sends Super+Shift plus a key. Tools disagree on what that key is: xev (through XWayland) says `XF86Assistant`, while GNOME sees `TouchpadOff`. Don't guess the name. Let the user record it in **Settings → Keyboard → Custom Shortcuts** by pressing it; on the test machine GNOME saved `<Shift><Super>TouchpadOff`. Because it includes Super+Shift, keep a short `pre_type_delay_ms` and tap it rather than holding it.
 2. **Add the user to the `input` group.** Voxtype's `wait_for_modifier_release` then works, and hold-to-talk becomes possible. The tradeoff: any program the user runs can then read all keyboard input. Needs sudo and a fresh login.
 3. **Stopgap:** `output.pre_type_delay_ms 600` delays typing, so modifiers are usually released first. It's not a guarantee.
 
