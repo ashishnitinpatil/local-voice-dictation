@@ -1,9 +1,36 @@
 #!/bin/sh
 # Start/stop voxtype meeting transcription; bind to a desktop shortcut.
-if voxtype meeting status | grep -q '^Meeting Status: recording'; then
+# The notification reports the state voxtype is actually in afterwards, and replaces the
+# previous one so a stale "started" can't linger next to (or instead of) "stopped".
+run=${XDG_RUNTIME_DIR:-/tmp}
+exec 9>"$run/voxtype-meeting-toggle.lock"
+flock -n 9 || exit 0   # ignore a second press while the first is still stopping/starting
+
+recording() { voxtype meeting status 2>/dev/null | grep -q '^Meeting Status: recording'; }
+
+if recording; then
     voxtype meeting stop
-    notify-send -i media-record "Meeting transcription stopped" "Transcript saved. Ask Claude to summarize it."
+    want=stopped
 else
     voxtype meeting start -t "Meeting $(date '+%a %d %b %H:%M')"
-    notify-send -i media-record "Meeting transcription started" "Press Ctrl+Alt+M again to stop."
+    want=recording
 fi
+
+# Wait (up to ~5 s) for voxtype to reach the requested state.
+i=0
+while [ $i -lt 10 ]; do
+    if recording; then state=recording; else state=stopped; fi
+    [ "$state" = "$want" ] && break
+    sleep 0.5; i=$((i + 1))
+done
+
+if [ "$state" = recording ]; then
+    title="Meeting transcription RECORDING"; body="Press Ctrl+Alt+M again to stop."
+else
+    title="Meeting transcription stopped"; body="Transcript saved. Ask Claude to summarize it."
+fi
+[ "$state" = "$want" ] || body="(Didn't switch as asked — check: voxtype meeting status) $body"
+
+idfile=$run/voxtype-meeting-notify-id
+id=$(notify-send -p -r "$(cat "$idfile" 2>/dev/null || echo 0)" -i media-record "$title" "$body")
+[ -n "$id" ] && echo "$id" >"$idfile"

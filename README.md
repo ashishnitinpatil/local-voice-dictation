@@ -127,7 +127,7 @@ Run `voxtype config set meeting.enabled true`, then restart. Voxtype records the
 - **Capturing the other participants needs `parec` and `pactl`** (the `pulseaudio-utils` package, which works on PipeWire too). Without them, the log says `No monitor source found, using mic only` and the other participants are silently missing.
 - **The audio source is picked when the meeting starts,** so start it after connecting headphones.
 - **On laptop speakers, the mic hears the other participants too** and produces junk under "You". Recommend headphones.
-- **Use a hotkey for meetings too:** [`scripts/voxtype-meeting-toggle`](scripts/voxtype-meeting-toggle) starts or stops a meeting and shows a desktop notification. Bind it to a second shortcut; the same modifier caveat applies.
+- **Use a hotkey for meetings too:** [`scripts/voxtype-meeting-toggle`](scripts/voxtype-meeting-toggle) starts or stops a meeting, then notifies with the state voxtype actually reached (replacing the previous notification, and ignoring a second press while the first is still stopping). Bind it to a second shortcut; the same modifier caveat applies.
 - **To summarize afterwards,** run `voxtype meeting export latest --speakers --timestamps` and hand the transcript to an AI for decisions and action items. That sends the transcript, but not the audio, to the AI provider. For fully local summaries, use a local model through Ollama (`meeting.summary.backend local`).
 - **Consent:** recording other people has legal implications in many places. Tell participants.
 
